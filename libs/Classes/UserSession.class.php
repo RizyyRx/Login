@@ -13,12 +13,32 @@ class UserSession{
             $agent=$_SERVER['HTTP_USER_AGENT'];
             $token=md5(rand(0,999999).$ip.$agent.time());
             $sql="INSERT INTO `user_session` (`uid`, `token`, `login_time`, `ip`, `user_agent`)
-            VALUES ('$user->id', '$token', now(), '$ip', '$agent')";
-            if($conn->query($sql)){
-                Session::set('session_token',$token);
-                return $token;
+            VALUES (?, ?, now(), ?, ?)";
+            try {
+                $stmt = $conn->prepare($sql);
+                if ($stmt === false) {
+                    throw new Exception('Prepare failed: ' . $conn->error);
+                }
+                $stmt->bind_param("isss", $user->id, $token, $ip, $agent);
+                if ($stmt->execute()) {
+                    Session::set('session_token', $token);
+                    $stmt->close();
+                    $conn->close();
+                    return $token;
+                } else {
+                    $stmt->close();
+                    $conn->close();
+                    return false;
+                }
             }
-            else{
+            catch (Exception $e) {
+                if ($stmt && $stmt instanceof mysqli_stmt) {
+                    $stmt->close();
+                }
+                if ($conn && $conn instanceof mysqli) {
+                    $conn->close();
+                }
+                error_log("Exception: " . $e->getMessage());
                 return false;
             }
         }
@@ -62,23 +82,28 @@ class UserSession{
         $this->conn=Database::getConnection();
         $this->token=$token;
         $this->data=null;
-        $sql="SELECT * FROM `user_session` WHERE `token` = '$token'";
-        try{
-            $result=$this->conn->query($sql);
-            if($result->num_rows==1){
-                $row=$result->fetch_assoc();
-                $this->data=$row;
-                $this->uid=$row['uid'];
+        $sql="SELECT * FROM `user_session` WHERE `token` = ?";
+        try {
+            $stmt = $this->conn->prepare($sql);
+            if ($stmt === false) {
+                throw new Exception('Prepare failed: ' . $this->conn->error);
             }
-            else{
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows == 1) {
+                $row = $result->fetch_assoc();
+                $this->data = $row;
+                $this->uid = $row['uid'];
+            } else {
                 throw new Exception("Session is invalid");
             }
+            $stmt->close();
         } catch (Exception $e) {
-            // Handle the exception gracefully
             echo "An error occurred: " . $e->getMessage();
-            // You can also log the error for debugging purposes
             error_log("Exception: " . $e->getMessage());
-        }    
+        }
     }
     //retrieves a User object in User.class.php representing the user associated with the session.
     public function getUser(){
@@ -130,12 +155,18 @@ class UserSession{
         if(!$this->conn){
             $this->conn=Database::getConnection();
         }
-        $sql="UPDATE `user_session` SET `active` = '0'
-        WHERE `uid` = $this->uid";
-        if($this->conn->query($sql)){
-            return true;
-        }
-        else{
+        $sql = "UPDATE `user_session` SET `active` = 0 WHERE `uid` = ?";
+        try {
+            $stmt = $this->conn->prepare($sql);
+            if ($stmt === false) {
+                throw new Exception('Prepare failed: ' . $this->conn->error);
+            }
+            $stmt->bind_param("i", $this->uid);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Exception: " . $e->getMessage());
             return false;
         }
         
@@ -166,10 +197,18 @@ class UserSession{
                 $this->conn=Database::getConnection();
             }
             $sql="DELETE FROM `user_session` WHERE `id`=$id";
-            if($this->conn->query($sql)){
-                return true;
-            }
-            else{
+            $sql = "DELETE FROM `user_session` WHERE `id` = ?";
+            try {
+                $stmt = $this->conn->prepare($sql);
+                if ($stmt === false) {
+                    throw new Exception('Prepare failed: ' . $this->conn->error);
+                }
+                $stmt->bind_param("i", $this->data['id']);
+                $result = $stmt->execute();
+                $stmt->close();
+                return $result;
+            } catch (Exception $e) {
+                error_log("Exception: " . $e->getMessage());
                 return false;
             }
         }

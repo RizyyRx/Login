@@ -14,6 +14,7 @@ if(Session::isset_session('session_token')){
         }
         else {
             header("Location: login.php");
+            exit();
         }
     }
     else{
@@ -22,5 +23,6 @@ if(Session::isset_session('session_token')){
 }
 else{
     header("Location: login.php");
+    exit();
 }    
 ?>
