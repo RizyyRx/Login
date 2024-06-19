@@ -7,7 +7,9 @@ if(Session::isset_session('session_token')){
                 <div class="container p-4 rounded shadow-lg text-center">
                     <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
                     <p>You have successfully Logged In.</p>
+                    <a href="logout.php" class="btn btn-danger">Logout</a>
                 </div>
+                
             </div><?
         }
         else {
