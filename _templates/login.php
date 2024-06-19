@@ -1,22 +1,37 @@
 <?
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//debug methods
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
+//initialize login_page to true
 $login_page = true;
+
+//check if username and password present in $_POST and not empty
 if (isset($_POST['username']) && isset($_POST['password'])) {
     if (!empty($_POST['username']) && !empty($_POST['password'])) {
         $username = $_POST['username'];
         $password = $_POST['password'];
+
+        //authenticating, token is set in $_SESSION if succeeded
         $result = UserSession::authenticate($username,$password);
+
+        //change login_page to false
         $login_page = false;
     }
 }
 
+//check if login credentials are provided or not
 if (!$login_page) {
+
+    //check if login is success or not
     if ($result) {
+
+        //redirect to welcome page
         header("Location: welcome.php");
         exit();
     } 
-    else { ?>
+    else { 
+    // display "Invalid credentials" and ask to login again   ?>
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -32,7 +47,9 @@ if (!$login_page) {
         </div>
     <? }
 } 
-else { ?>
+else { 
+    //display login page
+    ?>
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="row w-100">
             <div class="col-md-6 col-lg-4 mx-auto">

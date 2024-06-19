@@ -1,3 +1,4 @@
+<!--Template for displaying an error page-->
 <div class="flex-shrink-0">
 	<div class="container">
 		<h1 class="mt-5">Error!</h1>

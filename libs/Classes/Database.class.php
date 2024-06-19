@@ -1,6 +1,8 @@
 <?
 class Database{
     public static $conn=NULL;
+
+    //gets Database connection using DB credentials
     public static function getConnection(){
         
         if(Database::$conn==NULL){//creates new connection
@@ -16,6 +18,8 @@ class Database{
             }
             else{
                 Database::$conn=$connection;
+
+                //return the connection
                 return Database::$conn;
             }
         }

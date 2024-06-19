@@ -1,5 +1,9 @@
 <?
+
+//initialize signup as false
 $signup = false;
+
+//check if credentials are present in $_POST and not empty
 if (isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password']) && isset($_POST['phone'])) {
     if (!empty($_POST['username']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['phone'])) {
         $username = $_POST['username'];
@@ -7,13 +11,21 @@ if (isset($_POST['username']) && isset($_POST['email']) && isset($_POST['passwor
         $password = $_POST['password'];
         $phone = $_POST['phone'];
 
+        //execute signup, boolean value is returned to $error
         $error = User::signup($username, $email, $password, $phone);
+
+        //change signup to true
         $signup = true;
     }
 }
 
+//check if signup credentials are provided or not
 if ($signup) {
+
+    //check if signup is successful (error=false)
     if (!$error) {
+
+        //display "signup success" 
 ?>
         <div class="container">
             <div class="bg-body-tertiary p-5 rounded mt-3">
@@ -22,7 +34,10 @@ if ($signup) {
             </div>
         </div>
     <?
-    } else {   ?>
+    } else {
+        
+        //display "signup failed"
+        ?>
         <div class="container">
             <div class="bg-body-tertiary p-5 rounded mt-3">
                 <h1>Signup failed</h1>
@@ -32,7 +47,10 @@ if ($signup) {
     <?
 
     }
-} else { ?>
+} else { 
+    
+    //display signup page
+    ?>
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="row w-100">
             <div class="col-md-6 col-lg-4 mx-auto">

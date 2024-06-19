@@ -2,28 +2,47 @@
 
 class UserSession{
 
-//Sets token and fingerprint in $_Session array if all conditions are satisfied
+    //Sets token in $_Session array if all conditions are satisfied
     public static function authenticate($user,$pass){
-        //Rename login function
-        $username=User::login($user,$pass);//retrieves username
-        $user=new User($username);//creates new user object(id will be acquired from __construct function)
+
+        //retrieves username when login is success
+        $username=User::login($user,$pass);
+
+        //creates new user object(id will be acquired from __construct function)
+        $user=new User($username);
+
+        //check if login is success
         if($username){
+
+            //get DB connection
             $conn=Database::getConnection();
+
+            //fetch ip and user agent details from $_SERVER
             $ip=$_SERVER['REMOTE_ADDR'];
             $agent=$_SERVER['HTTP_USER_AGENT'];
+
+            //build a token
             $token=md5(rand(0,999999).$ip.$agent.time());
+
+            //query statement
             $sql="INSERT INTO `user_session` (`uid`, `token`, `login_time`, `ip`, `user_agent`)
             VALUES (?, ?, now(), ?, ?)";
             try {
+
+                //using prepared statements
                 $stmt = $conn->prepare($sql);
                 if ($stmt === false) {
                     throw new Exception('Prepare failed: ' . $conn->error);
                 }
                 $stmt->bind_param("isss", $user->id, $token, $ip, $agent);
                 if ($stmt->execute()) {
+
+                    //set token to $_SESSION if query is executed
                     Session::set('session_token', $token);
                     $stmt->close();
                     $conn->close();
+
+                    //return token
                     return $token;
                 } else {
                     $stmt->close();
@@ -31,6 +50,8 @@ class UserSession{
                     return false;
                 }
             }
+
+            //Exception handling
             catch (Exception $e) {
                 if ($stmt && $stmt instanceof mysqli_stmt) {
                     $stmt->close();
@@ -50,7 +71,7 @@ class UserSession{
     /*
     * Authorize function have has 4 level of checks 
         1.Check that the IP and User agent field is filled.
-        2.Check if the session is correct and active.
+        2.Check if the session is valid(if 1HR has passed or not).
         3.Check that the current IP is the same as the previous IP
         4.Check that the current user agent is the same as the previous user agent
 
@@ -59,7 +80,11 @@ class UserSession{
     public static function authorize($token)
     {
         try {
-            $session = new UserSession($token);//since new UserSession object is created, the construct func returns uid of an user in DB
+
+            //new UserSession object is created, the construct func returns all data of the user from DB
+            $session = new UserSession($token);
+
+            //start the checks
             if (isset($_SERVER['REMOTE_ADDR']) and isset($_SERVER["HTTP_USER_AGENT"])) {
                 if ($session->isValid()) {
                     if ($_SERVER['REMOTE_ADDR'] == $session->getIP()) {
@@ -77,13 +102,21 @@ class UserSession{
         }
     }
 
-//saves the data of a row and the uid of an user in DB where token matches the token in DB
+    //saves the data of a row and the uid of an user in DB where input token matches the token in DB
     public function __construct($token){
+
+        //get DB connection
         $this->conn=Database::getConnection();
+
+        //initializing token and data variables
         $this->token=$token;
         $this->data=null;
+        
+        //query statement
         $sql="SELECT * FROM `user_session` WHERE `token` = ?";
         try {
+
+            //using prepared statements
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $this->conn->error);
@@ -93,23 +126,35 @@ class UserSession{
             $result = $stmt->get_result();
 
             if ($result->num_rows == 1) {
+
+                //return result in associative array format
                 $row = $result->fetch_assoc();
+
+                //set row to data
                 $this->data = $row;
+
+                //set row of uid to uid
                 $this->uid = $row['uid'];
             } else {
                 throw new Exception("Session is invalid");
             }
             $stmt->close();
-        } catch (Exception $e) {
+        }
+        
+        //Exception handling
+        catch (Exception $e) {
             echo "An error occurred: " . $e->getMessage();
             error_log("Exception: " . $e->getMessage());
         }
     }
+
+
     //retrieves a User object in User.class.php representing the user associated with the session.
     public function getUser(){
         return new User($this->uid);
     }
 
+    //checks if session is valid. Checks if 1hr has passed or not from the time when the session is created
     public function isValid(){
         try{
             if(isset($this->data['login_time'])){
@@ -133,6 +178,7 @@ class UserSession{
         }    
     }
 
+    //fetches ip from data property of the object
     public function getIP(){
         if(isset($this->data['ip'])){
             return $this->data['ip'];
@@ -142,6 +188,7 @@ class UserSession{
         }
     }
 
+    //fetches user agent from data property of the object
     public function getUserAgent(){
         if(isset($this->data['user_agent'])){
             return $this->data['user_agent'];
@@ -151,6 +198,7 @@ class UserSession{
         }
     }
 
+    //deactivates the session
     public function deactivate(){
         if(!$this->conn){
             $this->conn=Database::getConnection();
@@ -172,6 +220,7 @@ class UserSession{
         
     }
 
+    //checks is session is active or not
     public function isActive()
     {
         if (isset($this->data['active'])) {
@@ -179,17 +228,7 @@ class UserSession{
         }
     }
 
-    public function getFingerprint(){
-        if(isset($this->data['fingerprint'])){
-            if($this->data['fingerprint']){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-    }
-
+    //removes row on session DB using row id
     public function removeSession(){
         if(isset($this->data['id'])){
             $id=$this->data['id'];

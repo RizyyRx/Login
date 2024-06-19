@@ -1,3 +1,4 @@
+<!--Template for main home page-->
 <div class="d-flex align-items-center justify-content-center vh-100">
     <div class="container p-4 rounded shadow-lg text-center">
         <h1>Welcome, User!</h1>

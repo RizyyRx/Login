@@ -1,6 +1,12 @@
 <?
+
+//check if token is set in $_SESSION (set by UserSession::authenticate)
 if(Session::isset_session('session_token')){
+
+    //check if authorize is successful or not
     if(UserSession::authorize(Session::get('session_token'))){
+
+        //get username from $_SESSION and display it (set by User::login )
         if (Session::isset_session('username')) {
             $username = $_SESSION['username']; ?>
             <div class="d-flex align-items-center justify-content-center vh-100">
@@ -13,6 +19,8 @@ if(Session::isset_session('session_token')){
             </div><?
         }
         else {
+
+            //redirect to login page
             header("Location: login.php");
             exit();
         }
@@ -22,6 +30,8 @@ if(Session::isset_session('session_token')){
     }
 }
 else{
+
+    //redirect to login page
     header("Location: login.php");
     exit();
 }    
