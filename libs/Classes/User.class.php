@@ -15,7 +15,7 @@
         }
 
         //query statement for inserting
-        $sql = "INSERT INTO `login_credentials` (`username`, `password`, `email`, `phone`) VALUES ($user, $pass, $email, $phone)";
+        $sql = "INSERT INTO `login_credentials` (`username`, `password`, `email`, `phone`) VALUES ('$user', '$pass', '$email', '$phone')";
         
         //initialize error as false
         $error = false;
