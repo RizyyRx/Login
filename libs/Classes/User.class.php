@@ -27,7 +27,7 @@
         
         try{
 
-            //using prepared statements
+            //using prepared statements.
             $stmt = $conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $conn->error);
@@ -72,7 +72,7 @@
         $sql = "SELECT * FROM `login_credentials` WHERE `username` = ? OR `email` = ?";
         try{
 
-            //using prepared statements
+            //using prepared statements.
             $stmt=$conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $conn->error);
@@ -124,7 +124,7 @@
         $sql="SELECT `id` FROM `login_credentials` WHERE `username` = ? OR `id` = ?";
         try{
 
-            //using prepared statements
+            //using prepared statements.
             $stmt=$this->conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $this->conn->error);

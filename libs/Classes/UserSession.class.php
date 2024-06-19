@@ -29,7 +29,7 @@ class UserSession{
             VALUES (?, ?, now(), ?, ?)";
             try {
 
-                //using prepared statements
+                //using prepared statements.
                 $stmt = $conn->prepare($sql);
                 if ($stmt === false) {
                     throw new Exception('Prepare failed: ' . $conn->error);
@@ -116,7 +116,7 @@ class UserSession{
         $sql="SELECT * FROM `user_session` WHERE `token` = ?";
         try {
 
-            //using prepared statements
+            //using prepared statements.
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $this->conn->error);
@@ -205,6 +205,8 @@ class UserSession{
         }
         $sql = "UPDATE `user_session` SET `active` = 0 WHERE `uid` = ?";
         try {
+
+            //using prepared statements.
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . $this->conn->error);
@@ -238,6 +240,8 @@ class UserSession{
             $sql="DELETE FROM `user_session` WHERE `id`=$id";
             $sql = "DELETE FROM `user_session` WHERE `id` = ?";
             try {
+
+                //using prepared statements.
                 $stmt = $this->conn->prepare($sql);
                 if ($stmt === false) {
                     throw new Exception('Prepare failed: ' . $this->conn->error);
