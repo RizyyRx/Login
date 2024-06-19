@@ -63,5 +63,29 @@
             return false;
         }
     }
+
+    //user id fetched in __construct() function with either username or id
+    public function __construct($username){
+        $this->conn=Database::getConnection();//$this refers to the name of object that is constructed
+        $this->username=$username;//the username in $this->username is not defined as a property
+        //so, it is basically being assigned to a value here...since it is undefined
+        $this->id=null;
+        $sql="SELECT `id` FROM `login_credentials` WHERE `username` = '$username' OR `id` = '$username'";
+        try{
+            $result=$this->conn->query($sql);
+            if($result->num_rows==1){
+                $row=$result->fetch_assoc();//fetch_assoc returns the value in associative array format
+                $this->id=$row['id'];//assigning id property to the object with the id value fetched from DB
+            }
+            else{
+                throw new Exception("Username doesn't exist");
+            }
+        } catch (Exception $e) {
+            // Handle the exception gracefully
+            echo "An error occurred: " . $e->getMessage();
+            // You can also log the error for debugging purposes
+            error_log("Exception: " . $e->getMessage());
+        }    
+    }
 }
  ?>

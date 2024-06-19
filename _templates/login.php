@@ -1,10 +1,12 @@
 <?
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 $login_page = true;
 if (isset($_POST['username']) && isset($_POST['password'])) {
     if (!empty($_POST['username']) && !empty($_POST['password'])) {
         $username = $_POST['username'];
         $password = $_POST['password'];
-        $result = User::login($username,$password);
+        $result = UserSession::authenticate($username,$password);
         $login_page = false;
     }
 }
