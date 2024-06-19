@@ -1,0 +1,3 @@
+<?
+Session::loadTemplate("_main");
+?>
